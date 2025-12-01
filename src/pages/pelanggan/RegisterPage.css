@@ -1,10 +1,6 @@
 /* Background gradient soft pink */
 .register-bg {
-  position: relative;
-  width: 100%;
-  height: 100vh;
-  overflow-x: hidden;
-
+  min-height: 100vh;
   background: linear-gradient(135deg, #ffd6e9, #ffe6f2, #fff7fb);
   display: flex;
   justify-content: center;
@@ -12,7 +8,6 @@
   padding: 25px;
   font-family: "Poppins", sans-serif;
 }
-
 
 /* Card */
 .register-card {
@@ -77,4 +72,22 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+.register-login {
+  margin-top: 15px;
+  text-align: center;
+  font-size: 14px;
+  color: #555;
+}
+
+.register-link {
+  margin-left: 5px;
+  color: #e91e63;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.register-link:hover {
+  text-decoration: underline;
 }

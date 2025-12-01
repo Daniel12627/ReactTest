@@ -1,55 +1,108 @@
-// src/pages/pelanggan/LoginPage.jsx
 import React, { useState } from "react";
 import { Form, FloatingLabel, Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { apiFetch } from "../../api/api.js";
+import axios from "axios";
 import "./LoginPage.css";
 import Logo from "../../assets/images/Logo.png";
 
+const API_BASE = "http://localhost:8000/api";
+
 const LoginPage = () => {
   const navigate = useNavigate();
-  const [form, setForm] = useState({ email: "", password: "" });
 
-  const handleChange = (e) =>
+  const [form, setForm] = useState({
+    email: "",
+    password: "",
+  });
+
+  const [errors, setErrors] = useState({});
+
+  const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+    setErrors({ ...errors, [e.target.name]: "" });
+  };
 
   const handleLogin = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
+    const { email, password } = form;
+    let newErrors = {};
 
-  if (!form.email || !form.password)
-    return toast.error("Email dan password wajib diisi");
+    // =======================================
+    // VALIDASI FRONTEND
+    // =======================================
+    if (!email) newErrors.email = "Email wajib diisi";
+    if (!password) newErrors.password = "Password wajib diisi";
 
-  try {
-    // Tentukan API berdasarkan email
-    let endpoint = "/pelanggan/login";
-    let role = "pelanggan";
-
-    if (form.email.includes("@admin")) {
-      endpoint = "/admin/login";
-      role = "admin";
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      toast.error("Silakan periksa input Anda");
+      return;
     }
 
-    const data = await apiFetch(endpoint, {
-      method: "POST",
-      body: JSON.stringify(form),
-      headers: { "Content-Type": "application/json" },
-    });
+    try {
+      let response = null;
 
-    localStorage.setItem("token", data.token);
-    localStorage.setItem("role", role);
-    localStorage.setItem("user", JSON.stringify(data.data));
+      // =======================================
+      // 1. COBA LOGIN ADMIN
+      // =======================================
+      try {
+        response = await axios.post(`${API_BASE}/admin/login`, {
+          email: email.toLowerCase(),
+          password,
+        });
 
-    toast.success(`Login ${role} berhasil!`);
+        // Jika berhasil, tetapkan role admin
+        localStorage.setItem("role", "admin");
+      } catch (err) {
+        response = null;
+      }
 
-    if (role === "admin") navigate("/admin/dashboard");
-    else navigate("/home");
+      // =======================================
+      // 2. JIKA BUKAN ADMIN, COBA LOGIN PELANGGAN
+      // =======================================
+      if (!response) {
+        response = await axios.post(`${API_BASE}/pelanggan/login`, {
+          email: email.toLowerCase(),
+          password,
+        });
 
-  } catch (err) {
-    toast.error(err.body?.message || "Login gagal!");
-  }
-};
+        // Jika berhasil, role = pelanggan
+        localStorage.setItem("role", "pelanggan");
+      }
 
+      const data = response.data;
+
+      // =======================================
+      // SIMPAN TOKEN & DATA USER
+      // =======================================
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.data)); // backend memakai 'data', bukan 'user'
+
+      // Setelah login, set default Authorization
+      axios.defaults.headers.common[
+        "Authorization"
+      ] = `Bearer ${data.token}`;
+
+      toast.success("Login berhasil!");
+
+      // Redirect berdasarkan role
+      const role = localStorage.getItem("role");
+
+      if (role === "admin") return navigate("/admin/dashboard");
+      return navigate("/home");
+    } catch (error) {
+      const msg = error.response?.data?.message;
+
+      if (msg === "Email atau password salah") {
+        toast.error("Akun belum terdaftar. Silakan daftar dulu.");
+
+        return;
+      }
+
+      toast.error(msg || "Login gagal");
+    }
+  };
 
   return (
     <div className="login-bg">
@@ -61,26 +114,36 @@ const LoginPage = () => {
         </div>
 
         <Form onSubmit={handleLogin}>
+          {/* EMAIL INPUT */}
           <FloatingLabel label="Email" className="mb-3">
             <Form.Control
               type="email"
+              placeholder="Email"
               name="email"
               value={form.email}
               onChange={handleChange}
-              className="login-input"
-              autoComplete="email"
+              className={`login-input ${errors.email ? "is-invalid" : ""}`}
             />
+            {errors.email && (
+              <div className="invalid-feedback">{errors.email}</div>
+            )}
           </FloatingLabel>
 
+          {/* PASSWORD INPUT */}
           <FloatingLabel label="Password" className="mb-3">
             <Form.Control
               type="password"
+              placeholder="Password"
               name="password"
               value={form.password}
               onChange={handleChange}
-              className="login-input"
-              autoComplete="current-password"
+              className={`login-input ${
+                errors.password ? "is-invalid" : ""
+              }`}
             />
+            {errors.password && (
+              <div className="invalid-feedback">{errors.password}</div>
+            )}
           </FloatingLabel>
 
           <Button type="submit" className="login-btn w-100 mb-3">
@@ -89,7 +152,10 @@ const LoginPage = () => {
 
           <p className="login-register">
             Belum punya akun?
-            <span className="login-link" onClick={() => navigate("/register")}>
+            <span
+              className="login-link"
+              onClick={() => navigate("/register")}
+            >
               Daftar di sini
             </span>
           </p>

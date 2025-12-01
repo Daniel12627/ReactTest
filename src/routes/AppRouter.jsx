@@ -20,6 +20,7 @@ import LayananPage from "../pages/pelanggan/LayananPage";
 import BookingPage from "../pages/pelanggan/BookingPage";
 import PesananPage from "../pages/pelanggan/PesananPage";
 import PembayaranPage from "../pages/pelanggan/PembayaranPage";
+import ProfilePage from "../pages/pelanggan/ProfilePage";
 
 const AppRouter = () => {
   return (

@@ -8,13 +8,13 @@ import ProtectedUser from "./protected/ProtectedUser";
 // Navbar
 import TopNavbar from "../components/TopNavbar";
 
-// ==== ADMIN PAGES ====
+// ADMIN PAGES
 import AdminDashboardPage from "../pages/admin/AdminDashboardPage";
 import AdminLayananPage from "../pages/admin/AdminLayananPage";
 import AdminPegawaiPage from "../pages/admin/AdminPegawaiPage";
 import AdminPesananPage from "../pages/admin/AdminPesananPage";
 
-// ==== USER PAGES ====
+// USER PAGES
 import LoginPage from "../pages/pelanggan/LoginPage";
 import RegisterPage from "../pages/pelanggan/RegisterPage";
 import HomePage from "../pages/pelanggan/HomePage";
@@ -27,7 +27,6 @@ function LayoutRouter() {
   const location = useLocation();
   const role = localStorage.getItem("role");
 
-  // Tentukan navbar customer/admin
   const customerRoutes = [
     { name: "Home", path: "/home" },
     { name: "Layanan", path: "/layanan" },
@@ -44,15 +43,13 @@ function LayoutRouter() {
 
   const navRoutes = role === "admin" ? adminRoutes : customerRoutes;
 
-  // ⛔ HIDE NAVBAR WHEN LOGIN OR REGISTER
   const hideNavbar = ["/", "/login", "/register"].includes(location.pathname);
 
   return (
     <>
-      {/* NAVBAR GLOBAL */}
       {!hideNavbar && <TopNavbar routes={navRoutes} />}
 
-      <div style={{ paddingTop: hideNavbar ? "0px" : "100px" }}>
+      <div style={{ paddingTop: hideNavbar ? 0 : 100 }}>
         <Routes>
 
           {/* AUTH */}

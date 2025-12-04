@@ -4,10 +4,12 @@ import { Container, Table, Button, Badge } from "react-bootstrap";
 import { toast } from "sonner";
 import { apiFetch } from "../../api/api";
 import { formatToAMPM } from "../../utils/time";
+import { useNavigate } from "react-router-dom";
 import "./PesananPage.css";
 
 const PesananPage = () => {
   const [data, setData] = useState([]);
+  const navigate = useNavigate();
 
   const load = async () => {
     try {
@@ -24,10 +26,7 @@ const PesananPage = () => {
 
   const cancel = async (id) => {
     try {
-      await apiFetch(`/pemesanan/delete/${id}`, {
-        method: "DELETE",
-      });
-
+      await apiFetch(`/pemesanan/delete/${id}`, { method: "DELETE" });
       toast.success("Pesanan dibatalkan");
       load();
     } catch {
@@ -70,12 +69,7 @@ const PesananPage = () => {
 
                     <td>
                       <Badge
-                        bg={
-                          p.status_pemesanan === "pending"
-                            ? "warning"
-                            : "success"
-                        }
-                        className="status-badge"
+                        bg={p.status_pemesanan === "pending" ? "warning" : "success"}
                       >
                         {p.status_pemesanan}
                       </Badge>
@@ -83,14 +77,28 @@ const PesananPage = () => {
 
                     <td>
                       {p.status_pemesanan === "pending" && (
-                        <Button
-                          variant="danger"
-                          size="sm"
-                          className="btn-batal"
-                          onClick={() => cancel(p.id_pemesanan)}
-                        >
-                          Batalkan
-                        </Button>
+                        <>
+                          <Button
+                            variant="success"
+                            size="sm"
+                            className="me-2"
+                            onClick={() =>
+                              navigate("/pembayaran", {
+                                state: { booking: p },
+                              })
+                            }
+                          >
+                            Bayar
+                          </Button>
+
+                          <Button
+                            variant="danger"
+                            size="sm"
+                            onClick={() => cancel(p.id_pemesanan)}
+                          >
+                            Batalkan
+                          </Button>
+                        </>
                       )}
                     </td>
                   </tr>

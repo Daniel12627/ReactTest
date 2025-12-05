@@ -28,10 +28,7 @@ const AdminDashboardPage = () => {
         const peg = await apiFetch("/pegawai/read");
         setStylists(peg || []);
 
-        /** ===============================================
-         *  TOTAL PENDAPATAN (FIX)
-         *  Ambil dari harga layanan di pemesanan yang sudah dibayar
-         *  =============================================== */
+        
         const payments = await apiFetch("/pembayaran/read");
         const pemesanan = await apiFetch("/pemesanan/read");
 
@@ -41,7 +38,7 @@ const AdminDashboardPage = () => {
 
         let total = 0;
         payments.forEach((pay) => {
-          // Cari pemesanan yang sesuai
+          
           const pesanan = pemesanan.find(p => p.id_pemesanan === pay.id_pemesanan);
           
           if (pesanan && pesanan.layanan) {
